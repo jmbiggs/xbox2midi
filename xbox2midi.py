@@ -43,20 +43,45 @@ def convertInputToMidi(pad):
 
     leftStick = pad.leftThumbstick()
     if leftStick:
-        print "leftStick"
+        print "left stick button"
 
     rightStick = pad.rightThumbstick()
+    if rightStick:
+        print "right stick button"
+    
     a = pad.A()
+    if a:
+        print "a"
+        
     b = pad.B()
+    if b:
+        print "b"
+        
     x = pad.X()
+    if x:
+        print "x"
+    
     y = pad.Y()
+    if y:
+        print "y"
+    
     leftBumper = pad.leftBumper()
+    if leftBumper:
+        print "left bumper"
+    
     rightBumper = pad.rightBumper()
+    if rightBumper:
+        print "right bumper"
 
     # Triggers (0 to 1)
     leftTrigger = pad.leftTrigger()
+    if leftTrigger != 0:
+        print "left trigger:", leftTrigger
+    
     rightTrigger = pad.rightTrigger()
-
+    if rightTrigger != 0:
+        print "right trigger:", rightTrigger
+    
 def printConnected(connected):
     if connected:
         print "Controller Connected"
@@ -82,8 +107,5 @@ if __name__ == "__main__":
 	# Start reading input
 	convertInputToMidi(pad)
 
-        # Move cursor back to start of line
-        #print chr(13),
     # Close out when done
     pad.close()
-
