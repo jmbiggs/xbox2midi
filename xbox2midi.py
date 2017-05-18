@@ -1,53 +1,56 @@
 import xbox
 
-if __name__ == "__main__":
-    pad = xbox.Joystick()
+def convertInputToMidi(pad):
+    # Left analog stick (-1 to 1)
+    leftX = pad.leftX()
+    if leftX != 0:
+        print("leftX: ", leftX, "\n");
 
+    leftY = pad.leftY()
+
+    # Right analog stick (-1 to 1)
+    rightX = pad.rightX()
+    rightY = pad.rightY()    
+
+    # Dpad (0 or 1)
+    dpadUp = pad.dpadUp()
+    dpadDown = pad.dpadDown()
+    dpadLeft = pad.dpadLeft()
+    dpadRight = pad.dpadRight()
+
+    # Buttons (0 or 1)
+    start = pad.Start()
+    leftStick = pad.leftThumbstick()
+    rightStick = pad.rightThumbstick()
+    a = pad.A()
+    b = pad.B()
+    x = pad.X()
+    y = pad.Y()
+    leftBumper = pad.leftBumper()
+    rightBumper = pad.rightBumper()
+
+    # Triggers (0 to 1)
+    leftTrigger = pad.leftTrigger()
+    rightTrigger = pad.rightTrigger()
+
+if __name__ == "__main__":
     print "xbox2midi running: Press Back button to exit"
+
+    pad = xbox.Joystick()
 
     # Loop until back button is pressed
     while not pad.Back():
 
         # Show connection status
-        if pad.connected():
-            print "Connected   ",
-        else:
-            print "Disconnected",
+        if not pad.connected():
+            print "Controller Disconnected"
+            break
     
 	# Start reading input
-	convertInputToMidi()
+	convertInputToMidi(pad)
 
         # Move cursor back to start of line
         #print chr(13),
     # Close out when done
-    joy.close()
+    pad.close()
 
-def convertInputToMidi():
-    # Left analog stick (-1 to 1)
-    var leftX = pad.leftX()
-    var leftY = pad.leftY()
-
-    # Right analog stick (-1 to 1)
-    var rightX = pad.rightX()
-    var rightY = pad.rightY()    
-
-    # Dpad (0 or 1)
-    var dpadUp = pad.dpadUp()
-    var dpadDown = pad.dpadDown()
-    var dpadLeft = pad.dpadLeft()
-    var dpadRight = pad.dpadRight()
-
-    # Buttons (0 or 1)
-    var start = pad.Start()
-    var leftStick = pad.leftThumbstick()
-    var rightStick = pad.rightThumbstick()
-    var a = pad.A()
-    var b = pad.B()
-    var x = pad.X()
-    var y = pad.Y()
-    var leftBumper = pad.leftBumper()
-    var rightBumper = pad.rightBumper()
-
-    # Triggers (0 to 1)
-    var leftTrigger = pad.leftTrigger()
-    var rightTrigger = pad.rightTrigger()
