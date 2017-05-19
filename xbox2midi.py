@@ -40,18 +40,21 @@ joysticks = [leftX, leftY, rightX, rightY, leftTrigger, rightTrigger]
 
 def convertInputToMidi():
     # handle buttons
-    for button in buttons:    
-        if not button.holding:
-            if eval(button.getButtonDown):
-                print button.description
+#    for button in buttons:
+    button = buttons[0]
+    
+    if not button.holding:
+        if eval(button.getButtonDown):
+            print button.description
                 button.holding = True
         else:
             button.holding = False
+    print "holding: ", button.holding
     
     # handle analog sticks
     for joystick in joysticks:
         currentValue = eval(joystick.getValue)
-        if currentValue != 0:
+        if currentValue >= 0.1 or currentValue <= -0.1:
             print joystick.description, ":", currentValue
     
 def printConnected(connected):
