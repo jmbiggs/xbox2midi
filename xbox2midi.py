@@ -7,7 +7,17 @@ class Button:
         self.description = description
         self.getButtonDown = getButtonDown    
 
-def convertInputToMidi(pad, dpadUp):
+def convertInputToMidi(pad, buttons):
+    
+    # Buttons (0 or 1)
+    for button in buttons:    
+        if not button.holding:
+            if eval(button.getButtonDown):
+                print button.description
+                button.holding = True
+        else:
+            button.holding = False
+    
     # Left analog stick (-1 to 1)
     leftX = pad.leftX()
     if leftX != 0:
@@ -25,63 +35,6 @@ def convertInputToMidi(pad, dpadUp):
     rightY = pad.rightY()
     if rightY:
         print "rightY:", rightY
-
-    # Dpad (0 or 1)
-    if not dpadUp.holding:
-        if eval(dpadUp.getButtonDown):
-            print dpadUp.description
-            dpadUp.holding = True
-    else:
-        dpadUp.holding = False
-
-    dpadDown = pad.dpadDown()
-    if dpadDown:
-        print "dpad down"
-
-    dpadLeft = pad.dpadLeft()
-    if dpadLeft:
-        print "dpad left"
-
-    dpadRight = pad.dpadRight()
-    if dpadRight:
-        print "dpad right"
-
-    # Buttons (0 or 1)
-    start = pad.Start()
-    if start:
-        print "start"
-
-    leftStick = pad.leftThumbstick()
-    if leftStick:
-        print "left stick button"
-
-    rightStick = pad.rightThumbstick()
-    if rightStick:
-        print "right stick button"
-    
-    a = pad.A()
-    if a:
-        print "a"
-        
-    b = pad.B()
-    if b:
-        print "b"
-        
-    x = pad.X()
-    if x:
-        print "x"
-    
-    y = pad.Y()
-    if y:
-        print "y"
-    
-    leftBumper = pad.leftBumper()
-    if leftBumper:
-        print "left bumper"
-    
-    rightBumper = pad.rightBumper()
-    if rightBumper:
-        print "right bumper"
 
     # Triggers (0 to 1)
     leftTrigger = pad.leftTrigger()
@@ -115,9 +68,23 @@ if __name__ == "__main__":
             printConnected(connected)
     
 	# Start reading input
-        dpadUp = Button("dpad up", "pad.dpadUp()")
+    dpadUp = Button("dpad up", "pad.dpadUp()")
+    dpadDown = Button("dpad down", "pad.dpadDown()")
+    dpadLeft = Button("dpad left", "pad.dpadLeft()")
+    dpadRight = Button("dpad right", "pad.dpadRight()")
+    start = Button("start", "pad.Start()")
+    leftStick = Button("left stick button", "pad.leftThumbstick()")
+    rightStick = Button("right stick button", "pad.rightThumbstick()")
+    a = Button("a", "pad.A()")
+    b = Button("b", "pad.B()")
+    x = Button("x", "pad.X()")
+    y = Button("y", "pad.Y()")
+    leftBumper = Button("left bumper", "pad.leftBumper()")
+    rightBumper = Button("right bumper", "pad.rightBumper()")
 
-	convertInputToMidi(pad, dpadUp)
+    buttons = [dpadUp, dpadDown, dpadLeft, dpadRight, start, leftStick, rightStick, a, b, x, y, leftBumper, rightBumper]
+
+	convertInputToMidi(pad, buttons)
 
     # Close out when done
     pad.close()
