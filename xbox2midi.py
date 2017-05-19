@@ -1,6 +1,13 @@
 import xbox
 
-def convertInputToMidi(pad):
+class Button:
+    holding = False
+    
+    def __init__(self, description, getButtonDown):
+        self.description = description
+        self.getButtonDown = getButtonDown    
+
+def convertInputToMidi(pad, dpadUp):
     # Left analog stick (-1 to 1)
     leftX = pad.leftX()
     if leftX != 0:
@@ -20,9 +27,12 @@ def convertInputToMidi(pad):
         print "rightY:", rightY
 
     # Dpad (0 or 1)
-    dpadUp = pad.dpadUp()
-    if dpadUp:
-        print "dpad up"
+    if not dpadUp.holding:
+        if dpadUp.getButtonDown():
+            print dpadUp.description
+            dpadUp.holding = True
+    else:
+        dpadUp.holding = False
 
     dpadDown = pad.dpadDown()
     if dpadDown:
@@ -105,7 +115,9 @@ if __name__ == "__main__":
             printConnected(connected)
     
 	# Start reading input
-	convertInputToMidi(pad)
+    dpadUp = Button("dpad up", pad.dpadUp())
+
+	convertInputToMidi(pad, dpadUp)
 
     # Close out when done
     pad.close()
