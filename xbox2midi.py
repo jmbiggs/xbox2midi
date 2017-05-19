@@ -11,9 +11,21 @@ class button:
         self.get_button_down = get_button_down    
 
 class joystick:
+    message = None
+
     def __init__(self, description, get_value):
         self.description = description
         self.get_value = get_value
+
+    def __init__(self, description, get_value):
+        self.description = description
+        self.get_value = get_value
+
+    def set_message(self, message):
+        self.message = message
+
+    def get_message(self):
+        return self.message
 
 # define buttons
 dpadUp = button("dpad up", "pad.dpadUp()")
@@ -32,16 +44,27 @@ rightBumper = button("right bumper", "pad.rightBumper()")
 
 # define analog joysticks
 leftX = joystick("left X", "pad.leftX()")
+#leftX.set_message(Message('control_change', control=20))
+
 leftY = joystick("left Y", "pad.leftY()")
+leftY.set_message(Message('control_change', control=24))
+
 rightX = joystick("right X", "pad.rightX()")
+#rightX.set_message(Message('control_change', control=20))
+
 rightY = joystick("right Y", "pad.rightY()")
-leftTrigger = joystick("left trigger", "pad.leftTrigger()")    
+rightY.set_message(Message('control_change', control=24))
+
+leftTrigger = joystick("left trigger", "pad.leftTrigger()")
+leftTrigger.set_message(Message('control_change', control=21))
+
 rightTrigger = joystick("right trigger", "pad.rightTrigger()")
+rightTrigger.set_message(Message('control_change', control=25))
 
 buttons = [dpadUp, dpadDown, dpadLeft, dpadRight, start, leftStick, rightStick, a, b, x, y, leftBumper, rightBumper]
 joysticks = [leftX, leftY, rightX, rightY, leftTrigger, rightTrigger]
 
-def convert_input_to_midi():
+def convert_input_to_midi(port):
     # handle buttons
     for button in buttons:    
         if button.holding:
@@ -57,8 +80,14 @@ def convert_input_to_midi():
     # handle analog sticks
     for joystick in joysticks:
         current_value = eval(joystick.get_value)
-        if current_value >= 0.1 or current_value <= -0.1:
-            print joystick.description, ":", current_value
+        #print joystick.description, ":", current_value
+        message = joystick.get_message()
+        if not message is None:
+            if current_value < 0:
+                message.value = (int)(abs(64 - (abs(current_value) * 63)))
+            else:
+                message.value = (int)(current_value * 63 + 64)
+            port.send(message)
     
 def print_connected(connected):
     if connected:
@@ -102,7 +131,7 @@ if __name__ == "__main__":
             print_port(port)
 
         # run conversions on inputs
-        convert_input_to_midi()
+        convert_input_to_midi(port)
 
     # Close out when done
     pad.close()
