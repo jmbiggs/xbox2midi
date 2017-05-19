@@ -43,12 +43,16 @@ def convertInputToMidi():
 #    for button in buttons:
     button = buttons[0]
     
-    if not button.holding:
+    if button.holding:
+        # check if it is still actually holding
+        if not eval(button.getButtonDown):
+            button.holding = False    
+    else:
+        # see if it is being pressed (for the first time)
         if eval(button.getButtonDown):
             print button.description
-                button.holding = True
-        else:
-            button.holding = False
+            button.holding = True
+
     print "holding: ", button.holding
     
     # handle analog sticks
