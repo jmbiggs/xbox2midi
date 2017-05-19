@@ -28,7 +28,7 @@ def convertInputToMidi(pad, dpadUp):
 
     # Dpad (0 or 1)
     if not dpadUp.holding:
-        if dpadUp.getButtonDown():
+        if eval(dpadUp.getButtonDown):
             print dpadUp.description
             dpadUp.holding = True
     else:
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             printConnected(connected)
     
 	# Start reading input
-    dpadUp = Button("dpad up", pad.dpadUp())
+        dpadUp = Button("dpad up", "pad.dpadUp()")
 
 	convertInputToMidi(pad, dpadUp)
 
