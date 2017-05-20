@@ -36,18 +36,18 @@ rightTrigger = joystick("right trigger", "pad.rightTrigger()", Message('control_
 
 # define buttons
 dpadUp = button("dpad up", "pad.dpadUp()", lambda note=note: change_note(note + 12))
-dpadDown = button("dpad down", "pad.dpadDown()", lambda note=note: change_note(note - 12)))
-dpadLeft = button("dpad left", "pad.dpadLeft()", lambda note=note: change_note(note + 1)))
-dpadRight = button("dpad right", "pad.dpadRight()", lambda note=note: change_note(note - 1)))
+dpadDown = button("dpad down", "pad.dpadDown()", lambda note=note: change_note(note - 12))
+dpadLeft = button("dpad left", "pad.dpadLeft()", lambda note=note: change_note(note + 1))
+dpadRight = button("dpad right", "pad.dpadRight()", lambda note=note: change_note(note - 1))
 start = button("start", "pad.Start()", lambda: toggle_note_on_off())
-leftStick = button("left stick button", "pad.leftThumbstick()", lambda: global adjust_osc_1_pitch = not adjust_osc_1_pitch)
-rightStick = button("right stick button", "pad.rightThumbstick()", lambda: global adjust_osc_2_pitch = not adjust_osc_2_pitch)
+leftStick = button("left stick button", "pad.leftThumbstick()", None) #lambda: adjust_osc_1_pitch = not adjust_osc_1_pitch)
+rightStick = button("right stick button", "pad.rightThumbstick()", None) #lambda: adjust_osc_2_pitch = not adjust_osc_2_pitch)
 a = button("a", "pad.A()", lambda note=note: change_note(note - 4))
 b = button("b", "pad.B()", lambda note=note: change_note(note + 4))
 x = button("x", "pad.X()", lambda note=note: change_note(note - 7))
 y = button("y", "pad.Y()", lambda note=note: change_note(note + 7))
-leftBumper = button("left bumper", "pad.leftBumper()", lambda: global leftTrigger.toggle = not leftTrigger.toggle)
-rightBumper = button("right bumper", "pad.rightBumper()", lambda: global rightTrigger.toggle = not rightTrigger.toggle)
+leftBumper = button("left bumper", "pad.leftBumper()", None) #lambda: leftTrigger.toggle = not leftTrigger.toggle)
+rightBumper = button("right bumper", "pad.rightBumper()", None) # lambda: rightTrigger.toggle = not rightTrigger.toggle)
 
 # global variables to keep track of things
 note_is_on = False
@@ -70,7 +70,7 @@ def change_note(new_note):
         return
 
     port.send(Message('note_off', note=note))
-    global note = new_note
+    note = new_note
     port.send(Message('note_on', note=note))
 
 def toggle_note_on_off():
@@ -104,7 +104,8 @@ def convert_input_to_midi():
             # see if it is being pressed (for the first time)
             if eval(button.get_button_down):
 #                print button.description
-                eval(button.action)
+                if not button.action is None:
+                    eval(button.action)
                 button.holding = True
     
     # handle analog sticks
@@ -133,11 +134,11 @@ def convert_input_to_midi():
 if __name__ == "__main__":
     print "xbox2midi running: Press Back button to exit"
 
-    global pad = xbox.Joystick()
+    pad = xbox.Joystick()
     connected = pad.connected()
     print_connected(connected)
 
-    global port = mido.open_output('DSI Tetra:DSI Tetra MIDI 1 20:0')
+    port = mido.open_output('DSI Tetra:DSI Tetra MIDI 1 20:0')
     port_open = not port.closed
     print_port(port)
 
