@@ -35,32 +35,33 @@ class MidiConverter:
     #osc_2_fine_ascending = True
     current_note = 48
 
-    # define analog joysticks
-    leftX = Joystick("left X", "pad.leftX()", Message('control_change', control=OSC_1_SHAPE))
-    leftY = Joystick("left Y", "pad.leftY()", Message('control_change', control=OSC_1_PITCH))
-    rightX = Joystick("right X", "pad.rightX()", Message('control_change', control=OSC_2_SHAPE))
-    rightY = Joystick("right Y", "pad.rightY()", Message('control_change', control=OSC_2_PITCH))
-    leftTrigger = Joystick("left trigger", "pad.leftTrigger()", Message('control_change', control=OSC_1_FINE))
-    rightTrigger = Joystick("right trigger", "pad.rightTrigger()", Message('control_change', control=OSC_2_FINE))
-
-    # define buttons
-    dpadUp = Button("dpad up", "pad.dpadUp()", lambda note=current_note: change_note(note + 12))
-    dpadDown = Button("dpad down", "pad.dpadDown()", lambda note=current_note: change_note(note - 12))
-    dpadLeft = Button("dpad left", "pad.dpadLeft()", lambda note=current_note: change_note(note + 1))
-    dpadRight = Button("dpad right", "pad.dpadRight()", lambda note=current_note: change_note(note - 1))
-    start = Button("start", "pad.Start()", lambda: toggle_note_on_off())
-    leftStick = Button("left stick button", "pad.leftThumbstick()", None) #lambda: adjust_osc_1_pitch = not adjust_osc_1_pitch)
-    rightStick = Button("right stick button", "pad.rightThumbstick()", None) #lambda: adjust_osc_2_pitch = not adjust_osc_2_pitch)
-    a = Button("a", "pad.A()", lambda note=current_note: change_note(note - 4))
-    b = Button("b", "pad.B()", lambda note=current_note: change_note(note + 4))
-    x = Button("x", "pad.X()", lambda note=current_note: change_note(note - 7))
-    y = Button("y", "pad.Y()", lambda note=current_note: change_note(note + 7))
-    leftBumper = Button("left bumper", "pad.leftBumper()", None) #lambda: leftTrigger.toggle = not leftTrigger.toggle)
-    rightBumper = Button("right bumper", "pad.rightBumper()", None) # lambda: rightTrigger.toggle = not rightTrigger.toggle)
-
     def __init__(self, port, pad):
         self.port = port
         self.pad = pad
+        
+        # define analog joysticks
+        leftX = Joystick("left X", "pad.leftX()", Message('control_change', control=OSC_1_SHAPE))
+        leftY = Joystick("left Y", "pad.leftY()", Message('control_change', control=OSC_1_PITCH))
+        rightX = Joystick("right X", "pad.rightX()", Message('control_change', control=OSC_2_SHAPE))
+        rightY = Joystick("right Y", "pad.rightY()", Message('control_change', control=OSC_2_PITCH))
+        leftTrigger = Joystick("left trigger", "pad.leftTrigger()", Message('control_change', control=OSC_1_FINE))
+        rightTrigger = Joystick("right trigger", "pad.rightTrigger()", Message('control_change', control=OSC_2_FINE))
+
+        # define buttons
+        dpadUp = Button("dpad up", "pad.dpadUp()", lambda note=current_note: change_note(note + 12))
+        dpadDown = Button("dpad down", "pad.dpadDown()", lambda note=current_note: change_note(note - 12))
+        dpadLeft = Button("dpad left", "pad.dpadLeft()", lambda note=current_note: change_note(note + 1))
+        dpadRight = Button("dpad right", "pad.dpadRight()", lambda note=current_note: change_note(note - 1))
+        start = Button("start", "pad.Start()", lambda: toggle_note_on_off())
+        leftStick = Button("left stick button", "pad.leftThumbstick()", None) #lambda: adjust_osc_1_pitch = not adjust_osc_1_pitch)
+        rightStick = Button("right stick button", "pad.rightThumbstick()", None) #lambda: adjust_osc_2_pitch = not adjust_osc_2_pitch)
+        a = Button("a", "pad.A()", lambda note=current_note: change_note(note - 4))
+        b = Button("b", "pad.B()", lambda note=current_note: change_note(note + 4))
+        x = Button("x", "pad.X()", lambda note=current_note: change_note(note - 7))
+        y = Button("y", "pad.Y()", lambda note=current_note: change_note(note + 7))
+        leftBumper = Button("left bumper", "pad.leftBumper()", None) #lambda: leftTrigger.toggle = not leftTrigger.toggle)
+        rightBumper = Button("right bumper", "pad.rightBumper()", None) # lambda: rightTrigger.toggle = not rightTrigger.toggle)
+        
         self.buttons = [dpadUp, dpadDown, dpadLeft, dpadRight, start, leftStick, rightStick, a, b, x, y, leftBumper, rightBumper]
         self.pitch_joysticks = [leftX, leftY, rightX, rightY]
         self.fine_joysticks = [leftTrigger, rightTrigger]
