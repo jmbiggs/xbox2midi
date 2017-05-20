@@ -71,16 +71,16 @@ class MidiConverter:
         if new_note < 0 or new_note > 127:
             return
 
-        port.send(Message('note_off', note=current_note))
+        self.port.send(Message('note_off', note=self.current_note))
         self.current_note = new_note
-        port.send(Message('note_on', note=current_note))
+        self.port.send(Message('note_on', note=self.current_note))
 
     def toggle_note_on_off(self):
-        self.note_is_on = not note_is_on
-        if (note_is_on):
-            port.send(Message('note_on', note=current_note))
+        self.note_is_on = not self.note_is_on
+        if (self.note_is_on):
+            self.port.send(Message('note_on', note=self.current_note))
         else:
-            port.send(Message('note_off', note=current_note))
+            self.port.send(Message('note_off', note=self.current_note))
 
     def print_connected(self, connected):
         if connected:
@@ -89,10 +89,10 @@ class MidiConverter:
             print "Controller Disconnected"
 
     def print_port(self):
-        if port.closed:
+        if self.port.closed:
             print "MIDI port closed"
         else:
-            print "MIDI port open, connected to: ", port.name
+            print "MIDI port open, connected to: ", self.port.name
 
     # main function
     def convert_input_to_midi(self):
