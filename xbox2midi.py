@@ -48,17 +48,17 @@ class MidiConverter:
         rightTrigger = Joystick("right trigger", "pad.rightTrigger()", Message('control_change', control=OSC_2_FINE))
 
         # define buttons
-        dpadUp = Button("dpad up", "pad.dpadUp()", lambda note=self.current_note: self.change_note(note + 12))
-        dpadDown = Button("dpad down", "pad.dpadDown()", lambda note=self.current_note: self.change_note(note - 12))
-        dpadLeft = Button("dpad left", "pad.dpadLeft()", lambda note=self.current_note: self.change_note(note + 1))
-        dpadRight = Button("dpad right", "pad.dpadRight()", lambda note=self.current_note: self.change_note(note - 1))
+        dpadUp = Button("dpad up", "pad.dpadUp()", lambda: self.change_note(12))
+        dpadDown = Button("dpad down", "pad.dpadDown()", lambda: self.change_note(-12))
+        dpadLeft = Button("dpad left", "pad.dpadLeft()", lambda: self.change_note(-1))
+        dpadRight = Button("dpad right", "pad.dpadRight()", lambda: self.change_note(1))
         start = Button("start", "pad.Start()", lambda: self.toggle_note_on_off())
         leftStick = Button("left stick button", "pad.leftThumbstick()", None) #lambda: adjust_osc_1_pitch = not adjust_osc_1_pitch)
         rightStick = Button("right stick button", "pad.rightThumbstick()", None) #lambda: adjust_osc_2_pitch = not adjust_osc_2_pitch)
-        a = Button("a", "pad.A()", lambda note=self.current_note: self.change_note(note - 4))
-        b = Button("b", "pad.B()", lambda note=self.current_note: self.change_note(note + 4))
-        x = Button("x", "pad.X()", lambda note=self.current_note: self.change_note(note - 7))
-        y = Button("y", "pad.Y()", lambda note=self.current_note: self.change_note(note + 7))
+        a = Button("a", "pad.A()", lambda: self.change_note(-4))
+        b = Button("b", "pad.B()", lambda: self.change_note(4))
+        x = Button("x", "pad.X()", lambda: self.change_note(-7))
+        y = Button("y", "pad.Y()", lambda: self.change_note(7))
         leftBumper = Button("left bumper", "pad.leftBumper()", None) #lambda: leftTrigger.toggle = not leftTrigger.toggle)
         rightBumper = Button("right bumper", "pad.rightBumper()", None) # lambda: rightTrigger.toggle = not rightTrigger.toggle)
         
@@ -67,7 +67,9 @@ class MidiConverter:
         self.fine_joysticks = [leftTrigger, rightTrigger]
 
     # helper functions
-    def change_note(self, new_note):
+    def change_note(self, amount):
+        new_note = self.current_note + amount
+
         if new_note < 0 or new_note > 127:
             return
 
@@ -107,7 +109,6 @@ class MidiConverter:
                 if eval(button.get_button_down):
     #                print button.description
                     if button.action is not None:
-                        print button.action
                         button.action()
                     button.holding = True
         
