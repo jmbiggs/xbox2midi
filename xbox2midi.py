@@ -97,7 +97,7 @@ class MidiConverter:
     # main function
     def convert_input_to_midi(self):
         # handle buttons
-        for button in buttons:    
+        for button in self.buttons:    
             if button.holding:
                 # check if it is still actually holding
                 if not eval(button.get_button_down):
@@ -112,7 +112,7 @@ class MidiConverter:
                     button.holding = True
         
         # handle analog sticks
-        for joystick in pitch_joysticks:
+        for joystick in self.pitch_joysticks:
             current_value = eval(joystick.get_value)
     #        print joystick.description, ":", current_value
             message = joystick.message
@@ -123,7 +123,7 @@ class MidiConverter:
                     message.value = (int)(current_value * 63 + 64)
                 port.send(message)
                 
-        for joystick in fine_joysticks:
+        for joystick in self.fine_joysticks:
             current_value = eval(joystick.get_value)
     #        print joystick.description, ":", current_value
             message = joystick.message
