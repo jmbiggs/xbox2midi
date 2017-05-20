@@ -51,8 +51,8 @@ class MidiConverter:
         dpadLeft = Button("dpad left", "pad.dpadLeft()", lambda: self.change_note(-1))
         dpadRight = Button("dpad right", "pad.dpadRight()", lambda: self.change_note(1))
         start = Button("start", "pad.Start()", lambda: self.toggle_note_on_off())
-        leftStick = Button("left stick button", "pad.leftThumbstick()", lambda: map(lambda stick: stick.flip_toggle(),[self.leftX, self.leftY]))
-        rightStick = Button("right stick button", "pad.rightThumbstick()", lambda: map(lambda stick: stick.flip_toggle(),[self.rightX, self.rightY]))
+        leftStick = Button("left stick button", "pad.leftThumbstick()", lambda: self.leftY.flip_toggle())
+        rightStick = Button("right stick button", "pad.rightThumbstick()", lambda: self.rightY.flip_toggle())
         a = Button("a", "pad.A()", lambda: self.change_note(-4))
         b = Button("b", "pad.B()", lambda: self.change_note(4))
         x = Button("x", "pad.X()", lambda: self.change_note(-7))
@@ -61,8 +61,8 @@ class MidiConverter:
         rightBumper = Button("right bumper", "pad.rightBumper()", lambda: self.rightTrigger.flip_toggle())
         
         self.buttons = [dpadUp, dpadDown, dpadLeft, dpadRight, start, leftStick, rightStick, a, b, x, y, leftBumper, rightBumper]
-        self.pitch_joysticks = [leftX, leftY, rightX, rightY]
-        self.fine_joysticks = [leftTrigger, rightTrigger]
+        self.pitch_joysticks = [self.leftX, self.leftY, self.rightX, self.rightY]
+        self.fine_joysticks = [self.leftTrigger, self.rightTrigger]
 
     # helper functions
     def change_note(self, amount):
@@ -114,13 +114,14 @@ class MidiConverter:
         for joystick in self.pitch_joysticks:
             current_value = eval(joystick.get_value)
     #        print joystick.description, ":", current_value
-            message = joystick.message
-            if message is not None:
-                if current_value < 0:
-                    message.value = (int)(abs(64 - (abs(current_value) * 63)))
-                else:
-                    message.value = (int)(current_value * 63 + 64)
-                port.send(message)
+            if not joystick.toggle:
+                message = joystick.message
+                if message is not None:
+                    if current_value < 0:
+                        message.value = (int)(abs(64 - (abs(current_value) * 63)))
+                    else:
+                        message.value = (int)(current_value * 63 + 64)
+                    port.send(message)
                 
         for joystick in self.fine_joysticks:
             current_value = eval(joystick.get_value)
