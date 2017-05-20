@@ -18,6 +18,14 @@ class joystick:
         self.get_value = get_value
         self.message = message
 
+# global variables to keep track of things
+note_is_on = False
+adjust_osc_1_pitch = False
+adjust_osc_2_pitch = False
+#osc_1_fine_ascending = True
+#osc_2_fine_ascending = True
+current_note = 48
+
 # define control change (CC) message values
 osc_1_pitch = 20
 osc_2_pitch = 24
@@ -35,27 +43,19 @@ leftTrigger = joystick("left trigger", "pad.leftTrigger()", Message('control_cha
 rightTrigger = joystick("right trigger", "pad.rightTrigger()", Message('control_change', control=osc_2_fine))
 
 # define buttons
-dpadUp = button("dpad up", "pad.dpadUp()", lambda note=note: change_note(note + 12))
-dpadDown = button("dpad down", "pad.dpadDown()", lambda note=note: change_note(note - 12))
-dpadLeft = button("dpad left", "pad.dpadLeft()", lambda note=note: change_note(note + 1))
-dpadRight = button("dpad right", "pad.dpadRight()", lambda note=note: change_note(note - 1))
+dpadUp = button("dpad up", "pad.dpadUp()", lambda note=current_note: change_note(note + 12))
+dpadDown = button("dpad down", "pad.dpadDown()", lambda note=current_note: change_note(note - 12))
+dpadLeft = button("dpad left", "pad.dpadLeft()", lambda note=current_note: change_note(note + 1))
+dpadRight = button("dpad right", "pad.dpadRight()", lambda note=current_note: change_note(note - 1))
 start = button("start", "pad.Start()", lambda: toggle_note_on_off())
 leftStick = button("left stick button", "pad.leftThumbstick()", None) #lambda: adjust_osc_1_pitch = not adjust_osc_1_pitch)
 rightStick = button("right stick button", "pad.rightThumbstick()", None) #lambda: adjust_osc_2_pitch = not adjust_osc_2_pitch)
-a = button("a", "pad.A()", lambda note=note: change_note(note - 4))
-b = button("b", "pad.B()", lambda note=note: change_note(note + 4))
-x = button("x", "pad.X()", lambda note=note: change_note(note - 7))
-y = button("y", "pad.Y()", lambda note=note: change_note(note + 7))
+a = button("a", "pad.A()", lambda note=current_note: change_note(note - 4))
+b = button("b", "pad.B()", lambda note=current_note: change_note(note + 4))
+x = button("x", "pad.X()", lambda note=current_note: change_note(note - 7))
+y = button("y", "pad.Y()", lambda note=current_note: change_note(note + 7))
 leftBumper = button("left bumper", "pad.leftBumper()", None) #lambda: leftTrigger.toggle = not leftTrigger.toggle)
 rightBumper = button("right bumper", "pad.rightBumper()", None) # lambda: rightTrigger.toggle = not rightTrigger.toggle)
-
-# global variables to keep track of things
-note_is_on = False
-adjust_osc_1_pitch = False
-adjust_osc_2_pitch = False
-#osc_1_fine_ascending = True
-#osc_2_fine_ascending = True
-current_note = 48
 
 buttons = [dpadUp, dpadDown, dpadLeft, dpadRight, start, leftStick, rightStick, a, b, x, y, leftBumper, rightBumper]
 pitch_joysticks = [leftX, leftY, rightX, rightY]
@@ -69,16 +69,16 @@ def change_note(new_note):
     if new_note < 0 or new_note > 127:
         return
 
-    port.send(Message('note_off', note=note))
+    port.send(Message('note_off', note=current_note))
     note = new_note
-    port.send(Message('note_on', note=note))
+    port.send(Message('note_on', note=current_note))
 
 def toggle_note_on_off():
     note_is_on = not note_is_on
     if (note_is_on):
-        port.send(Message('note_on', note=note))
+        port.send(Message('note_on', note=current_note))
     else:
-        port.send(Message('note_off', note=note))
+        port.send(Message('note_off', note=current_note))
 
 def print_connected(connected):
     if connected:
@@ -105,14 +105,15 @@ def convert_input_to_midi():
             if eval(button.get_button_down):
 #                print button.description
                 if not button.action is None:
-                    eval(button.action)
+                    print button.action
+                    button.action()
                 button.holding = True
     
     # handle analog sticks
     for joystick in pitch_joysticks:
         current_value = eval(joystick.get_value)
 #        print joystick.description, ":", current_value
-        message = joystick.get_message()
+        message = joystick.message
         if not message is None:
             if current_value < 0:
                 message.value = (int)(abs(64 - (abs(current_value) * 63)))
@@ -123,7 +124,7 @@ def convert_input_to_midi():
     for joystick in fine_joysticks:
         current_value = eval(joystick.get_value)
 #        print joystick.description, ":", current_value
-        message = joystick.get_message()
+        message = joystick.message
         if not message is None:
             if not joystick.toggle:
                 message.value = (int)(current_value * 63 + 64)
@@ -140,7 +141,7 @@ if __name__ == "__main__":
 
     port = mido.open_output('DSI Tetra:DSI Tetra MIDI 1 20:0')
     port_open = not port.closed
-    print_port(port)
+    print_port()
 
     # Loop until back button is pressed
     while not pad.Back():
@@ -154,10 +155,10 @@ if __name__ == "__main__":
         was_open = port_open
         port_open = not port.closed
         if was_open != port_open:
-            print_port(port)
+            print_port()
 
         # run conversions on inputs
-        convert_input_to_midi(port)
+        convert_input_to_midi()
 
     # Close out when done
     pad.close()
