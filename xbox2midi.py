@@ -1,70 +1,99 @@
 import xbox
 import mido
-
 from mido import Message
 
 class button:
     holding = False
     
-    def __init__(self, description, get_button_down):
+    def __init__(self, description, get_button_down, action):
         self.description = description
-        self.get_button_down = get_button_down    
+        self.get_button_down = get_button_down
+        self.action = action
 
 class joystick:
-    message = None
-
-    def __init__(self, description, get_value):
+    toggle = False
+    
+    def __init__(self, description, get_value, message):
         self.description = description
         self.get_value = get_value
-
-    def __init__(self, description, get_value):
-        self.description = description
-        self.get_value = get_value
-
-    def set_message(self, message):
         self.message = message
 
-    def get_message(self):
-        return self.message
-
-# define buttons
-dpadUp = button("dpad up", "pad.dpadUp()")
-dpadDown = button("dpad down", "pad.dpadDown()")
-dpadLeft = button("dpad left", "pad.dpadLeft()")
-dpadRight = button("dpad right", "pad.dpadRight()")
-start = button("start", "pad.Start()")
-leftStick = button("left stick button", "pad.leftThumbstick()")
-rightStick = button("right stick button", "pad.rightThumbstick()")
-a = button("a", "pad.A()")
-b = button("b", "pad.B()")
-x = button("x", "pad.X()")
-y = button("y", "pad.Y()")
-leftBumper = button("left bumper", "pad.leftBumper()")
-rightBumper = button("right bumper", "pad.rightBumper()")
+# define control change (CC) message values
+osc_1_pitch = 20
+osc_2_pitch = 24
+osc_1_fine = 21
+osc_2_fine = 25
+osc_1_shape = 22
+osc_2_shape = 26
 
 # define analog joysticks
-leftX = joystick("left X", "pad.leftX()")
-#leftX.set_message(Message('control_change', control=20))
+leftX = joystick("left X", "pad.leftX()", Message('control_change', control=osc_1_shape))
+leftY = joystick("left Y", "pad.leftY()", Message('control_change', control=osc_1_pitch))
+rightX = joystick("right X", "pad.rightX()", Message('control_change', control=osc_2_shape))
+rightY = joystick("right Y", "pad.rightY()", Message('control_change', control=osc_2_pitch))
+leftTrigger = joystick("left trigger", "pad.leftTrigger()", Message('control_change', control=osc_1_fine))
+rightTrigger = joystick("right trigger", "pad.rightTrigger()", Message('control_change', control=osc_2_fine))
 
-leftY = joystick("left Y", "pad.leftY()")
-leftY.set_message(Message('control_change', control=24))
+# define buttons
+dpadUp = button("dpad up", "pad.dpadUp()", lambda note=note: change_note(note + 12))
+dpadDown = button("dpad down", "pad.dpadDown()", lambda note=note: change_note(note - 12)))
+dpadLeft = button("dpad left", "pad.dpadLeft()", lambda note=note: change_note(note + 1)))
+dpadRight = button("dpad right", "pad.dpadRight()", lambda note=note: change_note(note - 1)))
+start = button("start", "pad.Start()", lambda: toggle_note_on_off())
+leftStick = button("left stick button", "pad.leftThumbstick()", lambda: global adjust_osc_1_pitch = not adjust_osc_1_pitch)
+rightStick = button("right stick button", "pad.rightThumbstick()", lambda: global adjust_osc_2_pitch = not adjust_osc_2_pitch)
+a = button("a", "pad.A()", lambda note=note: change_note(note - 4))
+b = button("b", "pad.B()", lambda note=note: change_note(note + 4))
+x = button("x", "pad.X()", lambda note=note: change_note(note - 7))
+y = button("y", "pad.Y()", lambda note=note: change_note(note + 7))
+leftBumper = button("left bumper", "pad.leftBumper()", lambda: global leftTrigger.toggle = not leftTrigger.toggle)
+rightBumper = button("right bumper", "pad.rightBumper()", lambda: global rightTrigger.toggle = not rightTrigger.toggle)
 
-rightX = joystick("right X", "pad.rightX()")
-#rightX.set_message(Message('control_change', control=20))
-
-rightY = joystick("right Y", "pad.rightY()")
-rightY.set_message(Message('control_change', control=24))
-
-leftTrigger = joystick("left trigger", "pad.leftTrigger()")
-leftTrigger.set_message(Message('control_change', control=21))
-
-rightTrigger = joystick("right trigger", "pad.rightTrigger()")
-rightTrigger.set_message(Message('control_change', control=25))
+# global variables to keep track of things
+note_is_on = False
+adjust_osc_1_pitch = False
+adjust_osc_2_pitch = False
+#osc_1_fine_ascending = True
+#osc_2_fine_ascending = True
+current_note = 48
 
 buttons = [dpadUp, dpadDown, dpadLeft, dpadRight, start, leftStick, rightStick, a, b, x, y, leftBumper, rightBumper]
-joysticks = [leftX, leftY, rightX, rightY, leftTrigger, rightTrigger]
+pitch_joysticks = [leftX, leftY, rightX, rightY]
+fine_joysticks = [leftTrigger, rightTrigger]
 
-def convert_input_to_midi(port):
+port = None
+pad = None
+
+# helper functions
+def change_note(new_note):
+    if new_note < 0 or new_note > 127:
+        return
+
+    port.send(Message('note_off', note=note))
+    global note = new_note
+    port.send(Message('note_on', note=note))
+
+def toggle_note_on_off():
+    note_is_on = not note_is_on
+    if (note_is_on):
+        port.send(Message('note_on', note=note))
+    else:
+        port.send(Message('note_off', note=note))
+
+def print_connected(connected):
+    if connected:
+        print "Controller Connected"
+    else:
+        print "Controller Disconnected"
+
+def print_port():
+    if port.closed:
+        print "MIDI port closed"
+    else:
+        print "MIDI port open, connected to: ", port.name
+
+# main functions
+def convert_input_to_midi():
     # handle buttons
     for button in buttons:    
         if button.holding:
@@ -74,13 +103,14 @@ def convert_input_to_midi(port):
         else:
             # see if it is being pressed (for the first time)
             if eval(button.get_button_down):
-                print button.description
+#                print button.description
+                eval(button.action)
                 button.holding = True
     
     # handle analog sticks
-    for joystick in joysticks:
+    for joystick in pitch_joysticks:
         current_value = eval(joystick.get_value)
-        #print joystick.description, ":", current_value
+#        print joystick.description, ":", current_value
         message = joystick.get_message()
         if not message is None:
             if current_value < 0:
@@ -88,33 +118,28 @@ def convert_input_to_midi(port):
             else:
                 message.value = (int)(current_value * 63 + 64)
             port.send(message)
+            
+    for joystick in fine_joysticks:
+        current_value = eval(joystick.get_value)
+#        print joystick.description, ":", current_value
+        message = joystick.get_message()
+        if not message is None:
+            if not joystick.toggle:
+                message.value = (int)(current_value * 63 + 64)
+            else:
+                message.value = (int)(abs(64 - (abs(current_value) * 63)))
+            port.send(message)
     
-def print_connected(connected):
-    if connected:
-        print "Controller Connected"
-    else:
-        print "Controller Disconnected"
-
-def print_port(port):
-    if port.closed:
-        print "MIDI port closed"
-    else:
-        print "MIDI port open, connected to: ", port.name
-
 if __name__ == "__main__":
     print "xbox2midi running: Press Back button to exit"
 
-    pad = xbox.Joystick()
+    global pad = xbox.Joystick()
     connected = pad.connected()
     print_connected(connected)
 
-    port = mido.open_output('DSI Tetra:DSI Tetra MIDI 1 20:0')
+    global port = mido.open_output('DSI Tetra:DSI Tetra MIDI 1 20:0')
     port_open = not port.closed
     print_port(port)
-
-    #print mido.get_output_names()
-    msg = Message('note_on', note=60)
-    port.send(msg)
 
     # Loop until back button is pressed
     while not pad.Back():
