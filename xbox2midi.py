@@ -66,6 +66,9 @@ class MidiConverter:
 
     # helper functions
     def change_note(self, amount):
+        if not self.note_is_on:
+            return
+        
         new_note = self.current_note + amount
 
         if new_note < 0 or new_note > 127:
