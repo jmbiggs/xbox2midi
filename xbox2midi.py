@@ -167,7 +167,7 @@ if __name__ == "__main__":
             converter.print_connected(connected)
 
         # show port status
-        was_open = port_open
+        was_open = ports_open
         ports_open = []
         for port in converter.ports:
             ports_open.append(not port.closed)
