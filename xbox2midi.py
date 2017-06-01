@@ -33,8 +33,8 @@ class MidiConverter:
     note_is_on = False
     current_note = 48
 
-    def __init__(self, port, pad):
-        self.port = port
+    def __init__(self, ports, pad):
+        self.ports = ports
         self.pad = pad
         
         # define analog joysticks
@@ -71,16 +71,20 @@ class MidiConverter:
         if new_note < 0 or new_note > 127:
             return
 
-        self.port.send(Message('note_off', note=self.current_note))
+        for port in self.ports:
+            port.send(Message('note_off', note=self.current_note))
         self.current_note = new_note
-        self.port.send(Message('note_on', note=self.current_note))
+        for port in self.ports:
+            port.send(Message('note_on', note=self.current_note))
 
     def toggle_note_on_off(self):
         self.note_is_on = not self.note_is_on
         if (self.note_is_on):
-            self.port.send(Message('note_on', note=self.current_note))
+            for port in self.ports:
+                port.send(Message('note_on', note=self.current_note))
         else:
-            self.port.send(Message('note_off', note=self.current_note))
+            for port in self.ports:
+                port.send(Message('note_off', note=self.current_note))
 
     def print_connected(self, connected):
         if connected:
@@ -88,11 +92,12 @@ class MidiConverter:
         else:
             print "Controller Disconnected"
 
-    def print_port(self):
-        if self.port.closed:
-            print "MIDI port closed"
-        else:
-            print "MIDI port open, connected to: ", self.port.name
+    def print_ports(self):
+        for port in self.ports:
+            if port.closed:
+                print "MIDI port closed"
+            else:
+                print "MIDI port open, connected to: ", port.name
 
     # main function
     def convert_input_to_midi(self):
@@ -105,7 +110,7 @@ class MidiConverter:
             else:
                 # see if it is being pressed (for the first time)
                 if eval(button.get_button_down):
-    #                print button.description
+#                    print button.description
                     if button.action is not None:
                         button.action()
                     button.holding = True
@@ -113,7 +118,7 @@ class MidiConverter:
         # handle analog sticks
         for joystick in self.pitch_joysticks:
             current_value = eval(joystick.get_value)
-    #        print joystick.description, ":", current_value
+#            print joystick.description, ":", current_value
             if not joystick.toggle:
                 message = joystick.message
                 if message is not None:
@@ -121,31 +126,37 @@ class MidiConverter:
                         message.value = (int)(abs(64 - (abs(current_value) * 63)))
                     else:
                         message.value = (int)(current_value * 63 + 64)
-                    port.send(message)
+                    for port in self.ports:
+                        port.send(message)
                 
         for joystick in self.fine_joysticks:
             current_value = eval(joystick.get_value)
-    #        print joystick.description, ":", current_value
+#            print joystick.description, ":", current_value
             message = joystick.message
             if message is not None:
                 if not joystick.toggle:
                     message.value = (int)(current_value * 63 + 64)
                 else:
                     message.value = (int)(abs(64 - (abs(current_value) * 63)))
-                port.send(message)
+                for port in self.ports:
+                    port.send(message)
     
 if __name__ == "__main__":
     print "xbox2midi running: Press Back button to exit"
 
     pad = xbox.Joystick()
-    port = mido.open_output('DSI Tetra:DSI Tetra MIDI 1 20:0')    
-    converter = MidiConverter(port, pad)
+    ports = []
+    for port_name in mido.get_output_names():
+        ports.append(mido.open_output(port_name))
+    converter = MidiConverter(ports, pad)
 
     connected = converter.pad.connected()
     converter.print_connected(connected)
 
-    port_open = not port.closed
-    converter.print_port()
+    ports_open = []
+    for port in ports:
+        ports_open.append(not port.closed)
+    converter.print_ports()
 
     # Loop until back button is pressed
     while not converter.pad.Back():
@@ -157,14 +168,18 @@ if __name__ == "__main__":
 
         # show port status
         was_open = port_open
-        port_open = not converter.port.closed
-        if was_open != port_open:
-            converter.print_port()
+        ports_open = []
+        for port in converter.ports:
+            ports_open.append(not port.closed)
+        for index in range(len(ports_open)):
+            if was_open[index] != ports_open[index]:
+                converter.print_port()
 
         # run conversions on inputs
         converter.convert_input_to_midi()
 
     # Close out when done
     converter.pad.close()
-    converter.port.reset()
-    converter.port.close()
+    for port in converter.ports:
+        port.reset()
+        port.close()
