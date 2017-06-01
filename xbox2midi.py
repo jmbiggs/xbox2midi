@@ -65,11 +65,12 @@ class MidiConverter:
         self.fine_joysticks = [self.leftTrigger, self.rightTrigger]
 
     # helper functions
-    def change_note(self, amount):
-        if not self.note_is_on:
-            return
-        
+    def change_note(self, amount):       
         new_note = self.current_note + amount
+
+        if not self.note_is_on:
+            self.current_note = new_note
+            return
 
         if new_note < 0 or new_note > 127:
             return
